@@ -34,8 +34,8 @@ class Program {
             ray_lengths[i+2] = length;
             ray_lengths[i+3] = length;
         }
-        var vao = gl.createVertexArray();
-        gl.bindVertexArray(vao);
+        var ray_vao = gl.createVertexArray();
+        gl.bindVertexArray(ray_vao);
 
         var ray_verticesAttrib = gl.getAttribLocation(ray_program, "position");
         var ray_verticesBuffer = gl.createBuffer();
@@ -57,9 +57,6 @@ class Program {
         
         gl.uniform1f(gl.getUniformLocation(ray_program, "ray_contribution"), 1.0 / Renderer.RAYS_COUNT);
         gl.uniform1f(gl.getUniformLocation(ray_program, "light_power"), light.power);
-        
-        if (!gl.getExtension("EXT_color_buffer_float"))   { console.log("EXT_color_buffer_float not available")};
-        if (!gl.getExtension("EXT_float_blend"))          { console.log("EXT_float_blend not available")};
         
         var tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -134,8 +131,30 @@ class Program {
         gl.clearColor(0, 0.5, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.disable(gl.BLEND);
-        
         gl.drawArrays(gl.TRIANGLES, 0, 6);
+        
+        //this.loop(gl, ray_program, ray_vao, fbo, quad_program, quad_vao);
+    }
+    
+    loop(gl, ray_program, ray_vao, fbo, quad_program, quad_vao) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.useProgram(ray_program);
+        gl.bindVertexArray(ray_vao);
+        gl.enable(gl.BLEND)
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.drawArrays(gl.LINES, 0, Renderer.RAYS_COUNT * 2);      
+        
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.useProgram(quad_program);
+        gl.bindVertexArray(quad_vao);
+        gl.disable(gl.BLEND);
+        gl.clearColor(0, 0.5, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        
+        console.log("a");
+
+        requestAnimationFrame(this.loop(gl, ray_program, ray_vao, fbo, quad_program, quad_vao));
     }
     
     createShader(type, source) {

@@ -12,4 +12,5 @@ void main() {
     color = pow(color, vec4(1.0/2.2));
     //color = texture(tex, vec2(gl_FragCoord.x / 960.0, gl_FragCoord.y / 540.0));
     //color = vec4(1,1,0,1);
+    color = vec4(f_uv, 0, 1);
 }
